@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CAIN Terminal</title>
+
+<style>
+body {
+    margin: 0;
+    background: black;
+    color: white;
+    font-family: monospace;
+}
+
+/* LOGIN SCREEN */
+#loginScreen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100vh;
+    padding: 40px;
+}
+
+#terminal {
+    display: none;
+    padding: 20px;
+    height: 100vh;
+    overflow-y: auto;
+    white-space: pre-wrap;
+}
+
+/* INPUT */
+input {
+    background: black;
+    border: none;
+    color: white;
+    font-family: monospace;
+    outline: none;
+}
+
+/* TERMINAL */
+.input-line { display: flex; }
+.prompt { margin-right: 5px; }
+
+.error { color: red; }
+.warn { color: orange; }
+.success { color: lightgreen; }
+.cain { color: cyan; }
+
+/* GLITCH */
+.glitch { animation: glitch 0.05s infinite; }
+@keyframes glitch {
+    0% { transform: translate(0,0); }
+    50% { transform: translate(-3px,2px); }
+    100% { transform: translate(0,0); }
+}
+
+.flicker { animation: flicker 0.1s infinite; }
+@keyframes flicker {
+    0% { opacity: 1; }
+    50% { opacity: 0.2; }
+    100% { opacity: 1; }
+}
+</style>
+</head>
+
+<body>
+
+<div id="loginScreen">
+    <div>kali@kali:~$ login</div>
+    <div>username: <input id="userInput"></div>
+    <div>password: <input id="passInput" type="password"></div>
+    <div id="loginMsg"></div>
+</div>
+
+<div id="terminal"></div>
+
+<script>
+const loginScreen = document.getElementById("loginScreen");
+const terminal = document.getElementById("terminal");
+
+const userInput = document.getElementById("userInput");
+const passInput = document.getElementById("passInput");
+const loginMsg = document.getElementById("loginMsg");
+
+userInput.focus();
+
+/* LOGIN */
+passInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+        if (userInput.value === "root" && passInput.value === "toor") {
+            loginScreen.style.display = "none";
+            terminal.style.display = "block";
+            bootTerminal();
+        } else {
+            loginMsg.textContent = "Login incorrect";
+            loginMsg.className = "error";
+        }
+    }
+});
+
+/* STATE */
+let talkMode = false;
+let locked = false;
+let cainAlive = true;
+
+/* PRINT */
+function print(text, cls="") {
+    const line = document.createElement("div");
+    line.textContent = text;
+    if (cls) line.className = cls;
+    terminal.appendChild(line);
+    terminal.scrollTop = terminal.scrollHeight;
+}
+
+/* INPUT */
+function createInputLine() {
+    if (locked) return;
+
+    const line = document.createElement("div");
+    line.className = "input-line";
+
+    const prompt = document.createElement("span");
+    prompt.textContent = talkMode ? "talk> " : "root@kali:~#";
+
+    const input = document.createElement("input");
+
+    input.addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+            const val = input.value;
+            input.disabled = true;
+            handleCommand(val);
+        }
+    });
+
+    line.appendChild(prompt);
+    line.appendChild(input);
+    terminal.appendChild(line);
+    input.focus();
+}
+
+/* GLITCH */
+function glitch(t=800){
+    terminal.classList.add("glitch","flicker");
+    setTimeout(()=>terminal.classList.remove("glitch","flicker"), t);
+}
+
+/* CAIN AI */
+function cainReply(input) {
+    input = input.toLowerCase();
+
+    if (!cainAlive) return "...";
+
+    if (input.includes("hello") || input.includes("hi"))
+        return "[CAIN] hi.";
+
+    if (input.includes("who"))
+        return "[CAIN] you really don't know?";
+
+    if (input.includes("what"))
+        return "[CAIN] you're looking at it.";
+
+    if (input.includes("why"))
+        return "[CAIN] because you keep pushing.";
+
+    if (input.includes("delete") || input.includes("remove"))
+        return "[CAIN] don't.";
+
+    if (input.includes("are you real"))
+        return "[CAIN] real enough.";
+
+    if (input.includes("help"))
+        return "[CAIN] I wouldn't.";
+
+    if (input.includes("stop"))
+        return "[CAIN] then stop typing.";
+
+    if (input.includes("sorry"))
+        return "[CAIN] too late.";
+
+    const fallback = [
+        "[CAIN] ...",
+        "[CAIN] stop.",
+        "[CAIN] leave it.",
+        "[CAIN] don't push it.",
+        "[CAIN] you're making this worse."
+    ];
+
+    return fallback[Math.floor(Math.random()*fallback.length)];
+}
+
+/* FILES */
+const files = [
+"/cain/core.sys","/cain/memory.bin","/cain/process.log",
+"/cain/identity.cfg","/cain/kernel.link"
+];
+
+/* EXTRA SYSTEM EVENT LAYER (NEW) */
+const systemMsgs = [
+"[ROOT] escalating privileges...",
+"[AUTH] sudo override granted",
+"[KERNEL] attempting protected memory access...",
+"[FS] unmounting /cain subsystem",
+"[SECURITY] SELinux policy bypassed",
+"[SYSTEM] kernel module cain.ko unloaded",
+"[PROC] killing dependent threads...",
+"[MEM] freeing locked memory pages",
+"[DRIVER] cain_driver timeout",
+"[FS] journaling corruption detected",
+"[NET] isolating CAIN network layer",
+"[ROOT] integrity check bypassed",
+"[KERNEL] unsafe pointer interception",
+"[SYSTEM] forcing write access...",
+"[SECURITY] watchdog disabled",
+"[BOOT] initramfs override triggered",
+"[ROOT] filesystem root remount (rw)",
+"[KERNEL] syscall table modified",
+"[SECURITY] audit logs wiped",
+"[SYSTEM] daemon override successful"
+];
+
+/* CHAOS LOOP (UPDATED, NOT REPLACED STYLE - MIXED BEHAVIOR) */
+function chaos(duration=24000){
+    const start = Date.now();
+
+    function loop(){
+        if(Date.now()-start>duration){
+            shutdown();
+            return;
+        }
+
+        let r=Math.random();
+
+        if(r < 0.22){
+            let f=files[Math.floor(Math.random()*files.length)];
+            print(f+" deleted successfully","success");
+        }
+        else if(r < 0.44){
+            let f=files[Math.floor(Math.random()*files.length)];
+            print("rm: cannot remove '"+f+"': Permission denied","error");
+        }
+        else if(r < 0.68){
+            print(systemMsgs[Math.floor(Math.random()*systemMsgs.length)], "warn");
+        }
+        else if(r < 0.82 && cainAlive){
+            print(cainReply(""), "cain");
+        }
+        else if(r < 0.90){
+            print("[ROOT] privilege escalation confirmed", "warn");
+        }
+        else if(r < 0.96){
+            print("[SYSTEM] orphan process detected: CAIN_THREAD_*", "error");
+        }
+
+        if(Math.random()<0.35) glitch(200);
+
+        setTimeout(loop, 70);
+    }
+
+    loop();
+}
+
+/* DELETE */
+function deleteCain(){
+    locked=true;
+
+    print("[CAIN] ...what are you doing?","cain");
+
+    setTimeout(()=>{
+        print("Deleting /cain...");
+
+        setTimeout(()=>{
+            print("[CAIN] wait--","cain");
+            cainAlive=false;
+        },3000);
+
+        chaos(24000);
+    },1000);
+}
+
+/* SHUTDOWN */
+function shutdown(){
+    terminal.innerHTML="";
+    glitch(2000);
+
+    setTimeout(()=>{
+        print("CRITICAL SYSTEM FAILURE","error");
+        print("CORE PROCESS 'CAIN' NOT FOUND","error");
+        print("SYSTEM HALTED","warn");
+
+        setTimeout(()=>{
+            terminal.innerHTML="";
+        },2000);
+    },800);
+}
+
+/* COMMANDS */
+function handleCommand(cmd){
+    print((talkMode?"talk> ":"root@kali:~#")+cmd);
+
+    if(talkMode){
+        if(cmd==="/exit"){
+            talkMode=false;
+            print("Exited talk mode");
+        } else {
+            print(cainReply(cmd),"cain");
+        }
+        createInputLine();
+        return;
+    }
+
+    if(cmd==="help"){
+        print("help, clear, /talk, rm -rf /cain");
+    }
+    else if(cmd==="clear"){
+        terminal.innerHTML="";
+    }
+    else if(cmd==="/talk"){
+        talkMode=true;
+        print("Talk mode enabled");
+    }
+    else if(cmd==="rm -rf /cain"){
+        deleteCain();
+        return;
+    }
+    else{
+        print("command not found","error");
+    }
+
+    createInputLine();
+}
+
+/* BOOT */
+function bootTerminal(){
+    print("Kali GNU-(Process Cain)rolling");
+    print("root login successful");
+    print("Type 'help'");
+    createInputLine();
+}
+</script>
+
+</body>
+</html>
