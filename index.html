@@ -2,6 +2,63 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<title>Cain-Terminal</title>
+
+<!-- REQUIRED for standalone mode -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<!-- App name under icon -->
+<meta name="apple-mobile-web-app-title" content="Cain-Terminal">
+
+<!-- Status bar style -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- App icon -->
+<link rel="apple-touch-icon" href="icon.png">
+
+<!-- Theme -->
+<meta name="theme-color" content="#000000">
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    background: black;
+    color: #00ff00;
+    height: 100%;
+    overflow: hidden;
+    font-family: monospace;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overscroll-behavior: none;
+    touch-action: manipulation;
+}
+</style>
+
+</head>
+<body>
+
+<h1>Cain-Terminal</h1>
+
+<script>
+// Detect if running as installed app
+if (window.navigator.standalone) {
+    console.log("Running as app");
+} else {
+    console.log("Running in Safari");
+}
+</script>
+
+</body>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
 <title>CAIN Terminal</title>
 
 <style>
